@@ -2,8 +2,15 @@ from rest_framework import generics, views, response, status
 from .models import User
 from .permissions import IsAdmin
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserRegistrationSerializer, LoginSerializer, UserSerializer
+from .serializers import UserRegistrationSerializer, LoginSerializer, UserSerializer, RiderSerializer
 
+
+
+class RiderListView(generics.ListAPIView):
+    serializer_class = RiderSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(is_rider=True)
 
 class UserSignUpViews(generics.CreateAPIView):
     object = User.objects.all()

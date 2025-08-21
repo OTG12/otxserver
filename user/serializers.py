@@ -6,6 +6,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 auth_service = CustomBackend()
 
+
+class RiderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "latitude", "longitude", "is_rider"]
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

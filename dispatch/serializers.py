@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from user.models import User
 from .models import Package, Location, Dispatch
 
 
@@ -13,9 +14,15 @@ class LocationSerializer(serializers.ModelSerializer):
         model = Location
         fields = ["id", "address", "latitude", "longitude"]
 
+class RiderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "latitude", "longitude"]
+
 
 class DispatchSerializer(serializers.ModelSerializer):
-    package = PackageSerializer(many=True, read_only=True)  # nested view
+    rider = RiderSerializer(read_only=True)
+    package = PackageSerializer(many=True, read_only=True)
     package_ids = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Package.objects.all(), write_only=True, source="package"
     )
@@ -34,7 +41,7 @@ class DispatchSerializer(serializers.ModelSerializer):
             "id",
             "tracking_id",
             "client",
-            "rider",
+            "rider",  # now includes rider's location
             "package",
             "package_ids",
             "total_cost",
@@ -54,4 +61,3 @@ class DispatchSerializer(serializers.ModelSerializer):
             "duration",
         ]
         read_only_fields = ["id", "tracking_id", "created_at", "updated_at"]
-
