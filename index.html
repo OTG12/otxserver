@@ -1,25 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>OpenStreetMap Example</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <meta charset="UTF-8">
+  <title>Rider Location Tracker</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
   <style>
-    #map { height: 500px; width: 100%; }
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
-  <script>
-    const map = L.map('map').setView([9.0579, 7.4951], 13); // Abuja, Nigeria
 
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // 1. Initialize map
+    const map = L.map('map').setView([0, 0], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    L.marker([9.0579, 7.4951]).addTo(map)
-      .bindPopup("Lagos, Nigeria")
-      .openPopup();
+    // 2. Marker for your location
+    let myMarker, myCircle;
+
+    // 3. Connect to WebSocket API
+    const socket = new WebSocket("ws://localhost:8000/ws/riders/");
+
+    socket.onopen = () => {
+      console.log("Connected to WebSocket ✅");
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log("Broadcast from server:", data);
+      // here you can also update markers for *other* riders
+    };
+
+    // 4. Function to send location to backend
+    function sendLocation(lat, lng) {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+          email: "me@example.com",   // 👈 replace with logged-in user’s email
+          latitude: lat,
+          longitude: lng
+        }));
+      }
+    }
+
+    // 5. Use Geolocation API to watch position
+    if ("geolocation" in navigator) {
+      navigator.geolocation.watchPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const accuracy = position.coords.accuracy;
+
+          // Update or create marker
+          if (myMarker) {
+            myMarker.setLatLng([lat, lng]);
+            myCircle.setLatLng([lat, lng]).setRadius(accuracy);
+          } else {
+            myMarker = L.marker([lat, lng]).addTo(map).bindPopup("You");
+            myCircle = L.circle([lat, lng], { radius: accuracy }).addTo(map);
+            map.setView([lat, lng], 15);
+          }
+
+          // Send location to backend WebSocket
+          sendLocation(lat, lng);
+        },
+        (error) => console.error("Location error:", error),
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+      );
+    } else {
+      alert("Geolocation not supported");
+    }
   </script>
 </body>
 </html>

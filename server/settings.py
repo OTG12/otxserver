@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,9 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user',
     'dispatch',
+    'kyc',
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_yasg',
+    
+
 ]
 
 MIDDLEWARE = [
@@ -71,7 +75,9 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'server.wsgi.application'
+# WSGI_APPLICATION = 'server.wsgi.application'
+
+ASGI_APPLICATION = "server.asgi.application"
 
 AUTHENTICATION_BACKENDS = [
     "user.backend.CustomBackend",

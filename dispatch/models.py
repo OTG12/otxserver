@@ -56,18 +56,18 @@ class Dispatch(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     payment_status = models.BooleanField(default=False)
-    duration = models.DurationField(null=True, blank=True)  # ✅ Duration instead of TimeField
+    duration = models.DurationField(null=True, blank=True)  
 
     def __str__(self):
         return f"Dispatch {self.tracking_id} - {self.status}"
 
     def save(self, *args, **kwargs):
-        # Ensure unique tracking ID on creation
+        
         if not self.tracking_id:
             new_id = generate_tracking_id()
             while Dispatch.objects.filter(tracking_id=new_id).exists():
                 new_id = generate_tracking_id()
             self.tracking_id = new_id
 
-        self.updated_at = timezone.now()  # update timestamp
-        super().save(*args, **kwargs)     # ✅ actually save to DB
+        self.updated_at = timezone.now()  
+        super().save(*args, **kwargs)     
