@@ -11,6 +11,7 @@ class RiderSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username", "email", "latitude", "longitude", "is_rider"]
+        ref_name = "UserRider" 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:

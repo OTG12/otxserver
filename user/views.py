@@ -49,10 +49,10 @@ class UserLoginView(views.APIView):
             }
 
         return response.Response(response_data, status=status.HTTP_201_CREATED)
-        return response.Response(serializer.errors, status=400)
+        
     
 
 class AllUsers(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdmin]
+    # permission_classes = [IsAdmin]
