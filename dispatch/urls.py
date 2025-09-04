@@ -15,5 +15,5 @@ urlpatterns = [
 
     path("", DispatchListCreateView.as_view(), name="dispatch-list-create"),
     path("<int:id>/", DispatchDetailView.as_view(), name="dispatch-detail"),
-    path("search/", DispatchSearchView.as_view(), name="dispatch-search"),
+    path("search/<str:tracking_id>", DispatchSearchView.as_view(), name="dispatch-search"),
 ]

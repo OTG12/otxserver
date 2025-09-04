@@ -67,15 +67,7 @@ class DispatchDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class DispatchSearchView(APIView):
-    def get(self, request):
-        tracking_id = request.query_params.get("tracking_id", None)
-
-        if not tracking_id:
-            return Response(
-                {"error": "tracking_id query parameter is required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
+    def get(self, request, tracking_id):
         dispatches = Dispatch.objects.filter(
             Q(tracking_id__icontains=tracking_id)
         ).order_by("-created_at")
