@@ -80,7 +80,23 @@ TEMPLATES = [
 CORS_ALLOW_ALL_ORIGINS = True
 
 
-# WSGI_APPLICATION = 'server.wsgi.application'
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'append',  # Add this line
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
 
 ASGI_APPLICATION = "server.asgi.application"
 

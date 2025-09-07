@@ -6,5 +6,7 @@ websocket_urlpatterns = [
     re_path(r"ws/riders/?$", RiderTrackerConsumer.as_asgi()),
 
     # specific rider by id
-    re_path(r"ws/riders/(?P<rider_id>\d+)/?$", RiderTrackerConsumer.as_asgi()),
+    re_path(r"ws/riders/(?P<rider_id>[0-9A-Fa-f\-]+)/?$", RiderTrackerConsumer.as_asgi()),
+
+
 ]

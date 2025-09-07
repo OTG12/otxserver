@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<<<<<<< HEAD
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TeenReach — Youth Development</title>
@@ -23,9 +24,84 @@
     @media (min-width:768px){
       h1{font-size:48px}
       h2{font-size:28px}
+=======
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TXpress - Dispatch Tracker</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background: #f9fafb;
     }
+    header {
+      background: #2563eb;
+      color: white;
+      padding: 16px;
+      text-align: center;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      height: calc(100% - 64px);
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+    #info-panel {
+      padding: 20px;
+      background: white;
+      border-left: 1px solid #e5e7eb;
+      overflow-y: auto;
+    }
+    .search-box {
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+    }
+    input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+    }
+    button {
+      padding: 8px 12px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      background: #f9fafb;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+>>>>>>> df6ee531eace5a2e4332ab35cf739c7367f66276
+    }
+    .badge.packing { background: #f59e0b; }
+    .badge.delivering { background: #3b82f6; }
+    .badge.completed { background: #10b981; }
+    .badge.cancelled { background: #ef4444; }
   </style>
 </head>
+<<<<<<< HEAD
 <body class="bg-[color:var(--bg)] text-slate-900 antialiased">
   <!-- Top nav -->
   <header class="backdrop-blur bg-white/60 border-b">
@@ -241,5 +317,135 @@
       </nav>
     </div>
   </footer>
+=======
+<body>
+  <header>
+    <h1>📦 TXpress Dispatch Tracker</h1>
+  </header>
+
+  <main>
+    <div id="map"></div>
+    <aside id="info-panel">
+      <div class="search-box">
+        <input type="text" id="trackingInput" placeholder="Enter Tracking ID (e.g. TRK-A6GARII3)">
+        <button onclick="searchDispatch()">Track</button>
+      </div>
+      <div id="dispatchDetails">
+        <p>Enter a tracking ID to view details.</p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Keyless Google Maps -->
+  <script src="https://cdn.jsdelivr.net/gh/somanchiu/Keyless-Google-Maps-API@v7.1/mapsJavaScriptAPI.js" async defer></script>
+
+  <script>
+    let map;
+    let riderMarker;
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 9.082, lng: 8.6753 }, // Nigeria default
+        zoom: 6,
+      });
+    }
+
+    async function searchDispatch() {
+      const trackingId = document.getElementById("trackingInput").value.trim();
+      if (!trackingId) return alert("Enter a tracking ID!");
+
+      try {
+        const res = await fetch(`http://127.0.0.1:8000/dispatch/search/${trackingId}`);
+        if (!res.ok) throw new Error("Not found");
+        const data = await res.json();
+        console.log(data);
+        if (!data.length) throw new Error("No dispatch found");
+        const dispatch = data[0];
+
+        if (!dispatch) {
+          document.getElementById("dispatchDetails").innerHTML = "<p>No dispatch found.</p>";
+          return;
+        }
+
+        // Auto-fix longitude sign if needed
+        let lat = parseFloat(dispatch.rider?.latitude || 0);
+        let lng = parseFloat(dispatch.rider?.longitude || 0);
+        if (lng > 0 && lat > 0 && lat < 50) {
+          lng = -lng; // correct for US coords
+        }
+
+        // Update map with rider marker
+        if (!riderMarker) {
+          riderMarker = new google.maps.Marker({
+            position: { lat, lng },
+            map,
+            title: dispatch.rider.username || "Rider",
+          });
+        } else {
+          riderMarker.setPosition({ lat, lng });
+        }
+        map.setCenter({ lat, lng });
+        map.setZoom(13);
+
+        // Render details
+        document.getElementById("dispatchDetails").innerHTML = `
+          <div class="card">
+            <h3>Tracking ID: ${dispatch.tracking_id}</h3>
+            <span class="badge ${dispatch.status.toLowerCase()}">${dispatch.status}</span>
+          </div>
+
+          <div class="card">
+            <h4>Rider</h4>
+            <p><strong>Name:</strong> ${dispatch.rider?.username || "N/A"}</p>
+            <p><strong>Email:</strong> ${dispatch.rider?.email || "N/A"}</p>
+            <p><strong>Coordinates:</strong> ${lat}, ${lng}</p>
+          </div>
+
+          <div class="card">
+            <h4>Sender</h4>
+            <p><strong>Email:</strong> ${dispatch.sender_email || "N/A"}</p>
+            <p><strong>Phone:</strong> ${dispatch.sender_phone_number || "N/A"}</p>
+          </div>
+
+          <div class="card">
+            <h4>Recipient</h4>
+            <p><strong>Name:</strong> ${dispatch.recipient_name || "N/A"}</p>
+            <p><strong>Phone:</strong> ${dispatch.destination_phone_number || "N/A"}</p>
+          </div>
+
+          <div class="card">
+            <h4>Pickup Location</h4>
+            <p>${dispatch.pickup_location?.address || "N/A"}</p>
+          </div>
+
+          <div class="card">
+            <h4>Destination</h4>
+            <p>${dispatch.destination_location?.address || "N/A"}</p>
+          </div>
+
+          <div class="card">
+            <h4>Packages</h4>
+            ${dispatch.package.map((pkg, i) => `
+              <p><strong>Package ${i+1}:</strong> ${pkg.description} (${pkg.weight}kg) - ₦${parseFloat(pkg.cost).toLocaleString()}</p>
+            `).join("")}
+          </div>
+
+          <div class="card">
+            <h4>Total Cost</h4>
+            <p><strong>₦${parseFloat(dispatch.total_cost).toLocaleString()}</strong></p>
+          </div>
+
+          <div class="card">
+            <h4>Order Info</h4>
+            <p><strong>Created At:</strong> ${new Date(dispatch.created_at).toLocaleString()}</p>
+            <p><strong>Payment Status:</strong> ${dispatch.payment_status ? "✅ Paid" : "❌ Unpaid"}</p>
+          </div>
+        `;
+      } catch (err) {
+        alert("Error fetching dispatch: " + err.message);
+      }
+    }
+  </script>
+>>>>>>> df6ee531eace5a2e4332ab35cf739c7367f66276
 </body>
 </html>

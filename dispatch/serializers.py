@@ -1,18 +1,7 @@
 from rest_framework import serializers
 from user.models import User
-from .models import Package, Location, Dispatch
+from .models import Dispatch
 
-
-class PackageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Package
-        fields = ["id", "description", "weight", "cost"]
-
-
-class LocationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Location
-        fields = ["id", "address", "latitude", "longitude"]
 
 class RiderSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,20 +9,15 @@ class RiderSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "email", "latitude", "longitude"]
 
 
+class ClientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "username", "email"]
+
+
 class DispatchSerializer(serializers.ModelSerializer):
     rider = RiderSerializer(read_only=True)
-    package = PackageSerializer(many=True, read_only=True)
-    package_ids = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Package.objects.all(), write_only=True, source="package"
-    )
-    pickup_location = LocationSerializer(read_only=True)
-    destination_location = LocationSerializer(read_only=True)
-    pickup_location_id = serializers.PrimaryKeyRelatedField(
-        queryset=Location.objects.all(), write_only=True, source="pickup_location"
-    )
-    destination_location_id = serializers.PrimaryKeyRelatedField(
-        queryset=Location.objects.all(), write_only=True, source="destination_location"
-    )
+    client = ClientSerializer(read_only=True)
 
     class Meta:
         model = Dispatch
@@ -41,23 +25,31 @@ class DispatchSerializer(serializers.ModelSerializer):
             "id",
             "tracking_id",
             "client",
-            "rider",  # now includes rider's location
-            "package",
-            "package_ids",
-            "total_cost",
+            "rider",
+            "package_weight",        # read-only, admin decides
+            "package_description",   # user can provide
+            "total_cost",            # read-only, admin decides
             "sender_name",
             "sender_email",
-            "recipient_name",
             "sender_phone_number",
-            "pickup_location",
-            "pickup_location_id",
-            "destination_location",
-            "destination_location_id",
+            "recipient_name",
+            "recipient_email",
             "destination_phone_number",
+            "pickup_location",       # string
+            "destination_location",  # string
             "status",
             "created_at",
             "updated_at",
-            "payment_status",
+            "payment_status",        # read-only, admin decides
             "duration",
         ]
-        read_only_fields = ["id", "tracking_id", "created_at", "updated_at"]
+        read_only_fields = [
+            "id",
+            "tracking_id",
+            "created_at",
+            "updated_at",
+            "status",
+            "package_weight",
+            "total_cost",
+            "payment_status",
+        ]

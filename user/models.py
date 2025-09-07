@@ -46,8 +46,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_rider = models.BooleanField(default=False)
 
     # Rider location
-    latitude = models.CharField(max_length=60, null=True, blank=True)
-    longitude = models.CharField(max_length=60, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True, blank=True)
