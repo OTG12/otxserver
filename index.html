@@ -1,557 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dispatch Tracking</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TeenReach — Youth Development</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    /* Apple-like refinements */
+    :root{
+      --accent: #0a84ff; /* blue accent */
+      --muted: #6b7280;
+      --glass: rgba(255,255,255,0.7);
+      --card: #ffffff;
+      --bg: #f7f7fb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
     }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-      min-height: 100vh;
-    }
-
-    .header {
-      background: white;
-      padding: 20px 0;
-      box-shadow: 0 2px 10px rgba(220, 53, 69, 0.1);
-      position: relative;
-      z-index: 1000;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-
-    .search-section {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: #dc3545;
-      margin-right: 30px;
-    }
-
-    .search-input {
-      padding: 12px 16px;
-      border: 2px solid #e9ecef;
-      border-radius: 8px;
-      font-size: 16px;
-      min-width: 250px;
-      transition: all 0.3s ease;
-    }
-
-    .search-input:focus {
-      outline: none;
-      border-color: #dc3545;
-      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
-    }
-
-    .search-btn {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .search-btn:hover {
-      background: #c82333;
-      transform: translateY(-1px);
-    }
-
-    .main-content {
-      display: none;
-      padding: 30px 0;
-    }
-
-    .tracking-grid {
-      display: grid;
-      grid-template-columns: 1fr 400px;
-      gap: 30px;
-      align-items: start;
-    }
-
-    .map-container {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      height: 500px;
-      position: relative;
-    }
-
-    .map-placeholder {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #6c757d;
-    }
-
-    .location-marker {
-      width: 20px;
-      height: 20px;
-      background: #dc3545;
-      border-radius: 50%;
-      margin: 10px;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.2); opacity: 0.7; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .info-panel {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
-
-    .panel-header {
-      background: #dc3545;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .panel-header h2 {
-      font-size: 20px;
-      margin-bottom: 5px;
-    }
-
-    .tracking-id {
-      font-family: 'Courier New', monospace;
-      font-size: 16px;
-      opacity: 0.9;
-    }
-
-    .panel-content {
-      padding: 25px;
-    }
-
-    .status-badge {
-      display: inline-block;
-      background: #dc3545;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-      margin-bottom: 20px;
-      text-transform: uppercase;
-    }
-
-    .info-group {
-      margin-bottom: 20px;
-    }
-
-    .info-label {
-      font-weight: 600;
-      color: #dc3545;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
-
-    .info-value {
-      color: #495057;
-      font-size: 14px;
-      line-height: 1.4;
-    }
-
-    .location-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      margin-bottom: 10px;
-    }
-
-    .location-icon {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .pickup-icon { background: #28a745; }
-    .destination-icon { background: #dc3545; }
-
-    .package-item {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #dc3545;
-    }
-
-    .package-title {
-      font-weight: 600;
-      color: #dc3545;
-      margin-bottom: 8px;
-    }
-
-    .package-details {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      font-size: 13px;
-      color: #6c757d;
-    }
-
-    .cost-highlight {
-      font-size: 18px;
-      font-weight: bold;
-      color: #dc3545;
-    }
-
-    .error-message {
-      background: #f8d7da;
-      color: #721c24;
-      padding: 15px;
-      border-radius: 8px;
-      text-align: center;
-      margin: 20px;
-    }
-
-    .loading {
-      display: none;
-      text-align: center;
-      padding: 20px;
-      color: #dc3545;
-    }
-
-    .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #dc3545;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 10px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @media (max-width: 768px) {
-      .tracking-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .search-section {
-        flex-direction: column;
-      }
-      
-      .logo {
-        margin-right: 0;
-        margin-bottom: 15px;
-      }
+    .container{max-width:1100px;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem}
+    .subtle-shadow{box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .muted{color:var(--muted)}
+    .btn-primary{background:var(--accent);color:white;padding:.75rem 1.2rem;border-radius:12px;font-weight:600}
+    .btn-ghost{border:1px solid rgba(15,23,42,0.06);padding:.6rem 1rem;border-radius:10px}
+    @media (min-width:768px){
+      h1{font-size:48px}
+      h2{font-size:28px}
     }
   </style>
 </head>
-<body>
-  <div class="header">
-    <div class="container">
-      <div class="search-section">
-        <div class="logo">📦 DispatchTracker</div>
-        <input type="text" id="trackingInput" class="search-input" placeholder="Enter your tracking ID (e.g., TRK-A6GARII3)">
-        <button onclick="searchDispatch()" class="search-btn">Track Package</button>
+<body class="bg-[color:var(--bg)] text-slate-900 antialiased">
+  <!-- Top nav -->
+  <header class="backdrop-blur bg-white/60 border-b">
+    <div class="container flex items-center justify-between h-16">
+      <a href="#home" class="flex items-center gap-3"><img src="" alt="" class="w-8 h-8 rounded-md bg-gradient-to-br from-sky-400 to-blue-600"/> <span class="font-semibold">TeenReach</span></a>
+      <nav class="hidden md:flex items-center gap-6 text-sm muted">
+        <a href="#about" class="hover:underline">About</a>
+        <a href="#programs" class="hover:underline">Programs</a>
+        <a href="#resources" class="hover:underline">Resources</a>
+        <a href="#get-involved" class="hover:underline">Get involved</a>
+        <a href="#contact" class="hover:underline">Contact</a>
+      </nav>
+      <div class="hidden md:block">
+        <a href="#donate" class="btn-primary">Donate</a>
       </div>
+      <button class="md:hidden btn-ghost">Menu</button>
     </div>
-  </div>
+  </header>
 
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p>Searching for your package...</p>
-  </div>
+  <!-- Hero -->
+  <main id="home">
+    <section class="py-20">
+      <div class="container grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div>
+          <p class="text-sm muted uppercase tracking-wide">Non-profit • Youth development</p>
+          <h1 class="mt-4 font-extrabold leading-tight">Helping teens find direction, skills, and hope</h1>
+          <p class="mt-4 muted max-w-xl">Practical programs in education, career readiness, health, and life skills — built around mentorship and measurable impact.</p>
 
-  <div class="main-content" id="mainContent">
-    <div class="container">
-      <div class="tracking-grid">
-        <div class="map-container">
-          <div class="map-placeholder" id="mapPlaceholder">
-            <div class="location-marker"></div>
-            <h3>Live Tracking Map</h3>
-            <p>Package location will be displayed here</p>
-            <div id="liveLocation"></div>
+          <div class="mt-6 flex gap-3">
+            <a href="#get-involved" class="btn-primary">Join our programs</a>
+            <a href="#programs" class="btn-ghost">Explore programs</a>
+          </div>
+
+          <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="p-4 rounded-2xl bg-white subtle-shadow text-center">
+              <div class="text-xl font-semibold">12,500+</div>
+              <div class="text-sm muted">Teens supported</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-white subtle-shadow text-center">
+              <div class="text-xl font-semibold">420</div>
+              <div class="text-sm muted">Volunteers</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-white subtle-shadow text-center">
+              <div class="text-xl font-semibold">65</div>
+              <div class="text-sm muted">Partner schools</div>
+            </div>
+            <div class="p-4 rounded-2xl bg-white subtle-shadow text-center">
+              <div class="text-xl font-semibold">18</div>
+              <div class="text-sm muted">Cities</div>
+            </div>
           </div>
         </div>
 
-        <div class="info-panel">
-          <div class="panel-header">
-            <h2>Dispatch Details</h2>
-            <div class="tracking-id" id="trackingIdDisplay"></div>
-          </div>
-          <div class="panel-content" id="dispatchDetails"></div>
+        <div class="rounded-3xl overflow-hidden subtle-shadow bg-white">
+          <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1400&auto=format&fit=crop" alt="teens" class="w-full h-full object-cover"/>
         </div>
       </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="py-20">
+      <div class="container grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="font-semibold">About TeenReach</h2>
+          <p class="mt-4 muted max-w-lg">We partner with schools, health professionals and industry mentors to deliver short intensive programs that prepare young people for education and work. Our approach is hands-on and evidence-based.</p>
+
+          <ul class="mt-6 grid gap-4">
+            <li class="flex items-start gap-4"><div class="w-9 h-9 rounded-lg bg-[color:var(--accent)]/10 grid place-items-center">✓</div><div><strong>Mission</strong><div class="muted text-sm">Equip teens with skills and confidence for post-school life.</div></div></li>
+            <li class="flex items-start gap-4"><div class="w-9 h-9 rounded-lg bg-[color:var(--accent)]/10 grid place-items-center">★</div><div><strong>Vision</strong><div class="muted text-sm">A world where every young person has pathways to opportunity.</div></div></li>
+          </ul>
+        </div>
+        <div class="grid grid-cols-1 gap-4">
+          <div class="p-6 rounded-2xl bg-white subtle-shadow">
+            <strong>Our team</strong>
+            <p class="mt-2 muted text-sm">Educators, counselors, and program managers focused on measurable outcomes.</p>
+          </div>
+          <div class="p-6 rounded-2xl bg-white subtle-shadow">
+            <strong>How we measure impact</strong>
+            <p class="mt-2 muted text-sm">Attendance, skills assessments, and post-program follow-ups across partner schools.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Programs -->
+    <section id="programs" class="py-20 bg-white">
+      <div class="container">
+        <h2 class="font-semibold">Programs & Initiatives</h2>
+        <p class="muted mt-2 max-w-2xl">Short courses and workshops tailored to teens — designed with partners in education and health.</p>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+          <article class="p-6 rounded-2xl subtle-shadow bg-[color:var(--card)]">
+            <h3 class="font-semibold">Education Support</h3>
+            <p class="muted text-sm mt-2">Tutoring, exam prep, and scholarship guidance focused on measurable progress.</p>
+          </article>
+          <article class="p-6 rounded-2xl subtle-shadow bg-[color:var(--card)]">
+            <h3 class="font-semibold">Career Guidance</h3>
+            <p class="muted text-sm mt-2">CV workshops, interview coaching, and industry mentorship.</p>
+          </article>
+          <article class="p-6 rounded-2xl subtle-shadow bg-[color:var(--card)]">
+            <h3 class="font-semibold">Health Awareness</h3>
+            <p class="muted text-sm mt-2">Mental health sessions, sexual health education, and nutrition workshops.</p>
+          </article>
+          <article class="p-6 rounded-2xl subtle-shadow bg-[color:var(--card)]">
+            <h3 class="font-semibold">Life Skills</h3>
+            <p class="muted text-sm mt-2">Financial literacy, leadership, and communication labs.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resources -->
+    <section id="resources" class="py-20">
+      <div class="container">
+        <h2 class="font-semibold">Resources</h2>
+        <p class="muted mt-2 max-w-2xl">Guides, short videos, and downloadable toolkits that teens can use on their own schedule.</p>
+
+        <div class="grid md:grid-cols-3 gap-6 mt-8">
+          <div class="p-6 rounded-2xl bg-white subtle-shadow">
+            <strong>Starter guide: Exam Prep</strong>
+            <p class="muted text-sm mt-2">A short checklist and study plan for senior students.</p>
+            <a class="mt-3 inline-block text-sm" href="#">Download PDF →</a>
+          </div>
+          <div class="p-6 rounded-2xl bg-white subtle-shadow">
+            <strong>Video: Managing stress</strong>
+            <p class="muted text-sm mt-2">10-minute session with a counselor on handling exam anxiety.</p>
+            <a class="mt-3 inline-block text-sm" href="#">Watch →</a>
+          </div>
+          <div class="p-6 rounded-2xl bg-white subtle-shadow">
+            <strong>Toolkit: CV & Interview</strong>
+            <p class="muted text-sm mt-2">Templates and a quick checklist to get interviews.</p>
+            <a class="mt-3 inline-block text-sm" href="#">Download →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Get involved -->
+    <section id="get-involved" class="py-20 bg-[color:var(--bg)]">
+      <div class="container grid lg:grid-cols-3 gap-6">
+        <div class="p-6 rounded-2xl bg-white subtle-shadow">
+          <h3 class="font-semibold">Volunteer</h3>
+          <p class="muted text-sm mt-2">Mentor, teach, or support events in your area.</p>
+          <form class="mt-4 space-y-3">
+            <input class="w-full border rounded-xl px-3 py-2" placeholder="Full name" />
+            <input class="w-full border rounded-xl px-3 py-2" placeholder="Email" type="email" />
+            <button type="button" class="w-full btn-primary">Sign up</button>
+          </form>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-white subtle-shadow" id="donate">
+          <h3 class="font-semibold">Donate</h3>
+          <p class="muted text-sm mt-2">Support scholarships and program costs.</p>
+          <div class="mt-4 grid grid-cols-3 gap-2">
+            <button class="py-2 rounded-lg border">₦2,000</button>
+            <button class="py-2 rounded-lg border">₦5,000</button>
+            <button class="py-2 rounded-lg border">₦10,000</button>
+          </div>
+          <button class="mt-4 w-full btn-primary">Give now</button>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-white subtle-shadow">
+          <h3 class="font-semibold">Partnerships</h3>
+          <p class="muted text-sm mt-2">Partner with us — schools, NGOs, and corporates welcome.</p>
+          <a href="#contact" class="mt-4 inline-block text-sm">Contact our partnerships team →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="stories" class="py-20">
+      <div class="container">
+        <h2 class="font-semibold">Impact stories</h2>
+        <div class="grid md:grid-cols-3 gap-6 mt-6">
+          <blockquote class="p-6 bg-white rounded-2xl subtle-shadow">“I wrote my first CV and landed an internship.” <div class="muted text-sm mt-3">— Aisha, 19</div></blockquote>
+          <blockquote class="p-6 bg-white rounded-2xl subtle-shadow">“The mental health sessions changed how I study for exams.” <div class="muted text-sm mt-3">— Chinedu, 17</div></blockquote>
+          <blockquote class="p-6 bg-white rounded-2xl subtle-shadow">“The coding workshop made me choose CS.” <div class="muted text-sm mt-3">— Maryam, 16</div></blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="py-20 bg-white">
+      <div class="container grid md:grid-cols-2 gap-8">
+        <form class="p-6 rounded-2xl bg-[color:var(--card)] subtle-shadow space-y-3">
+          <h3 class="font-semibold">Contact us</h3>
+          <input class="w-full border rounded-xl px-3 py-2" placeholder="Full name" />
+          <input class="w-full border rounded-xl px-3 py-2" placeholder="Email" type="email" />
+          <textarea class="w-full border rounded-xl px-3 py-2" placeholder="Message" rows="4"></textarea>
+          <button type="button" class="w-full btn-primary">Send message</button>
+        </form>
+        <aside class="p-6 rounded-2xl bg-[color:var(--card)] subtle-shadow">
+          <div class="muted">Email</div>
+          <div class="mt-1">hello@teenreach.org</div>
+          <div class="mt-4 muted">Phone</div>
+          <div class="mt-1">+234 800 000 0000</div>
+          <div class="mt-4 muted">Address</div>
+          <div class="mt-1">12 Unity Road, Lagos, Nigeria</div>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-8">
+    <div class="container flex flex-col md:flex-row items-center justify-between gap-4 muted">
+      <div>© 2025 TeenReach</div>
+      <nav class="flex gap-4 text-sm">
+        <a href="#about">About</a>
+        <a href="#programs">Programs</a>
+        <a href="#contact">Contact</a>
+      </nav>
     </div>
-  </div>
-
-  <script>
-    let currentDispatch = null;
-    let locationUpdateInterval = null;
-
-    // Handle Enter key in search input
-    document.getElementById("trackingInput").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") {
-        searchDispatch();
-      }
-    });
-
-    async function searchDispatch() {
-      const trackingId = document.getElementById("trackingInput").value.trim();
-      if (!trackingId) {
-        alert("Please enter a tracking ID");
-        return;
-      }
-
-      // Show loading
-      document.getElementById("loading").style.display = "block";
-      document.getElementById("mainContent").style.display = "none";
-
-      try {
-        const response = await fetch(`http://127.0.0.1:8000/dispatch/search/${trackingId}`);
-        if (!response.ok) {
-          throw new Error("Dispatch not found");
-        }
-        
-        const data = await response.json();
-        currentDispatch = data[0];
-        
-        // Hide loading and show content
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("mainContent").style.display = "block";
-        
-        displayDispatchDetails(currentDispatch);
-        startLocationTracking();
-        
-      } catch (error) {
-        document.getElementById("loading").style.display = "none";
-        showError(`Package not found: ${trackingId}`);
-      }
-    }
-
-    function displayDispatchDetails(dispatch) {
-      // Update tracking ID display
-      document.getElementById("trackingIdDisplay").textContent = dispatch.tracking_id;
-
-      // Build package details
-      let packageHtml = "";
-      dispatch.package.forEach((pkg, index) => {
-        packageHtml += `
-          <div class="package-item" style="margin-bottom: 15px;">
-            <div class="package-title">Package ${index + 1}: ${pkg.description}</div>
-            <div class="package-details">
-              <div><strong>Weight:</strong> ${pkg.weight}kg</div>
-              <div><strong>Cost:</strong> ₦${parseFloat(pkg.cost).toLocaleString()}</div>
-            </div>
-          </div>
-        `;
-      });
-
-      // Build dispatch details HTML
-      const detailsHtml = `
-        <div class="status-badge">${dispatch.status}</div>
-        
-        <div class="info-group">
-          <div class="info-label">Sender Information</div>
-          <div class="info-value">
-            ${dispatch.sender_email}<br>
-            ${dispatch.sender_phone_number || 'Phone not provided'}
-          </div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Recipient Information</div>
-          <div class="info-value">
-            ${dispatch.recipient_name || 'Name not provided'}<br>
-            ${dispatch.destination_phone_number}
-          </div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Pickup Location</div>
-          <div class="location-item">
-            <div class="location-icon pickup-icon"></div>
-            <div class="info-value">${dispatch.pickup_location.address}</div>
-          </div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Destination</div>
-          <div class="location-item">
-            <div class="location-icon destination-icon"></div>
-            <div class="info-value">${dispatch.destination_location.address}</div>
-          </div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Package Details</div>
-          ${packageHtml}
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Total Cost</div>
-          <div class="cost-highlight">₦${parseFloat(dispatch.total_cost).toLocaleString()}</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Order Date</div>
-          <div class="info-value">${new Date(dispatch.created_at).toLocaleString()}</div>
-        </div>
-
-        <div class="info-group">
-          <div class="info-label">Payment Status</div>
-          <div class="info-value" style="color: ${dispatch.payment_status ? '#28a745' : '#dc3545'}">
-            ${dispatch.payment_status ? '✓ Paid' : '✗ Unpaid'}
-          </div>
-        </div>
-      `;
-
-      document.getElementById("dispatchDetails").innerHTML = detailsHtml;
-    }
-
-    function startLocationTracking() {
-      // Clear any existing interval
-      if (locationUpdateInterval) {
-        clearInterval(locationUpdateInterval);
-      }
-
-      // Update location immediately
-      updateLiveLocation();
-
-      // Set up polling for live location updates every 10 seconds
-      locationUpdateInterval = setInterval(updateLiveLocation, 10000);
-    }
-
-    async function updateLiveLocation() {
-      if (!currentDispatch || !currentDispatch.rider) {
-        return;
-      }
-
-      try {
-        // Fetch updated dispatch data to get rider's current location
-        const response = await fetch(`http://127.0.0.1:8000/dispatch/search/${currentDispatch.tracking_id}`);
-        if (!response.ok) return;
-        
-        const data = await response.json();
-        const updatedDispatch = data[0];
-        
-        // Update current dispatch data
-        currentDispatch = updatedDispatch;
-        
-        // Display live location
-        displayLiveLocation(updatedDispatch.rider);
-        
-        // Update status if changed
-        const statusBadge = document.querySelector('.status-badge');
-        if (statusBadge) {
-          statusBadge.textContent = updatedDispatch.status;
-        }
-        
-      } catch (error) {
-        console.error("Error updating location:", error);
-      }
-    }
-
-    function displayLiveLocation(rider) {
-      const mapPlaceholder = document.getElementById("mapPlaceholder");
-      
-      if (rider.latitude && rider.longitude) {
-        // Rider location available
-        mapPlaceholder.innerHTML = `
-          <div style="padding: 20px; text-align: center;">
-            <div class="location-marker"></div>
-            <h3 style="color: #dc3545; margin-bottom: 15px;">📍 Live Location</h3>
-            <div style="background: rgba(220, 53, 69, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-              <strong>Rider: ${rider.username}</strong><br>
-              <small style="color: #6c757d;">${rider.email}</small>
-            </div>
-            <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-              <div style="color: #dc3545; font-weight: bold; margin-bottom: 8px;">Current Coordinates:</div>
-              <div style="font-family: 'Courier New', monospace; font-size: 14px;">
-                Lat: ${rider.latitude}<br>
-                Lng: ${rider.longitude}
-              </div>
-            </div>
-            <div style="margin-top: 15px; font-size: 12px; color: #6c757d;">
-              🔄 Updates every 10 seconds
-            </div>
-          </div>
-        `;
-      } else {
-        // No location data available
-        mapPlaceholder.innerHTML = `
-          <div style="padding: 20px; text-align: center;">
-            <div class="location-marker" style="background: #6c757d;"></div>
-            <h3 style="color: #6c757d; margin-bottom: 15px;">📍 Location Tracking</h3>
-            <div style="background: rgba(108, 117, 125, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-              <strong>Rider: ${rider.username}</strong><br>
-              <small style="color: #6c757d;">${rider.email}</small>
-            </div>
-            <div style="color: #6c757d;">
-              📡 Waiting for location data...<br>
-              <small>Rider's GPS will appear here once available</small>
-            </div>
-          </div>
-        `;
-      }
-    }
-
-    function showError(message) {
-      document.getElementById("mainContent").style.display = "block";
-      document.getElementById("mainContent").innerHTML = `
-        <div class="container">
-          <div class="error-message">
-            <h3>⚠️ ${message}</h3>
-            <p>Please check your tracking ID and try again.</p>
-          </div>
-        </div>
-      `;
-    }
-
-    // Stop location polling when page is hidden/closed
-    document.addEventListener('visibilitychange', function() {
-      if (document.hidden && locationUpdateInterval) {
-        clearInterval(locationUpdateInterval);
-      } else if (!document.hidden && currentDispatch) {
-        startLocationTracking();
-      }
-    });
-
-    // Add some sample tracking IDs for testing
-    window.addEventListener('load', function() {
-      const input = document.getElementById("trackingInput");
-      input.placeholder = "Enter tracking ID (e.g., TRK-A6GARII3)";
-    });
-  </script>
+  </footer>
 </body>
 </html>
