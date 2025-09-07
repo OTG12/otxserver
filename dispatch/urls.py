@@ -1,19 +1,18 @@
 from django.urls import path
 from .views import (
-    PackageListCreateView,
-    PackageDetailView,
-    PackageSearchView,
     DispatchListCreateView,
     DispatchDetailView,
     DispatchSearchView,
+    RiderStats,
+    RiderProfile,
+    RiderOrders
 )
 
 urlpatterns = [
-    path("packages/", PackageListCreateView.as_view(), name="package-list-create"),
-    path("packages/<int:id>/", PackageDetailView.as_view(), name="package-detail"),
-    path("packages/search/", PackageSearchView.as_view(), name="package-search"),
-
     path("", DispatchListCreateView.as_view(), name="dispatch-list-create"),
     path("<int:id>/", DispatchDetailView.as_view(), name="dispatch-detail"),
     path("search/<str:tracking_id>", DispatchSearchView.as_view(), name="dispatch-search"),
+    path("riders/stats", RiderStats.as_view(), name="rider-stats"),
+    path("riders/profile", RiderProfile.as_view(), name="rider-profile"),
+    path("riders/orders", RiderOrders.as_view(), name="rider-orders"),
 ]

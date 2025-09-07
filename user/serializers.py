@@ -10,7 +10,7 @@ auth_service = CustomBackend()
 class RiderSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "email", "latitude", "longitude", "is_rider"]
+        fields = ["id", "username", "email", "phone_number", "latitude", "longitude", "is_rider"]
         ref_name = "UserRider" 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

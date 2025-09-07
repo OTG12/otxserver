@@ -1,20 +1,18 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from user.models import User
+from asgiref.sync import sync_to_async
 
 
 class RiderTrackerConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # get rider_id from route if available
         self.rider_id = self.scope["url_route"]["kwargs"].get("rider_id", None)
 
-        # make group name
         if self.rider_id:
             self.group_name = f"rider_{self.rider_id}"
         else:
             self.group_name = "riders"
 
-        # join group
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
 
@@ -28,10 +26,9 @@ class RiderTrackerConsumer(AsyncWebsocketConsumer):
         longitude = data.get("longitude")
 
         if rider_id:
-            # update rider location in DB
             await self.update_rider_location(rider_id, latitude, longitude)
 
-            # broadcast to group of that rider
+            # Broadcast to rider-specific group
             await self.channel_layer.group_send(
                 f"rider_{rider_id}",
                 {
@@ -42,7 +39,7 @@ class RiderTrackerConsumer(AsyncWebsocketConsumer):
                 },
             )
 
-            # also broadcast to global group (all riders)
+            # Broadcast to global riders group
             await self.channel_layer.group_send(
                 "riders",
                 {
@@ -56,12 +53,12 @@ class RiderTrackerConsumer(AsyncWebsocketConsumer):
     async def send_location(self, event):
         await self.send(text_data=json.dumps(event))
 
-    @staticmethod
-    async def update_rider_location(rider_id, latitude, longitude):
+    @sync_to_async
+    def update_rider_location(self, rider_id, latitude, longitude):
         try:
             rider = User.objects.get(id=rider_id, is_rider=True)
-            rider.latitude = latitude
-            rider.longitude = longitude
+            rider.latitude = float(latitude)
+            rider.longitude = float(longitude)
             rider.save()
         except User.DoesNotExist:
             pass
