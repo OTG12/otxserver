@@ -1,6 +1,6 @@
 from rest_framework import generics, views, response, status
 from .models import User
-from .permissions import IsAdmin
+from .permissions import IsAdmin, IsRider
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserRegistrationSerializer, LoginSerializer, UserSerializer, RiderSerializer
 
@@ -8,6 +8,14 @@ from .serializers import UserRegistrationSerializer, LoginSerializer, UserSerial
 
 class RiderListView(generics.ListAPIView):
     serializer_class = RiderSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(is_rider=True)
+    
+class UpdateRiderView(generics.UpdateAPIView):
+    serializer_class = RiderSerializer
+    permission_classes = [IsRider]
+    lookup_field = "id" 
 
     def get_queryset(self):
         return User.objects.filter(is_rider=True)
