@@ -1,6 +1,5 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from user.models import User
 from asgiref.sync import sync_to_async
 
 
@@ -55,6 +54,9 @@ class RiderTrackerConsumer(AsyncWebsocketConsumer):
 
     @sync_to_async
     def update_rider_location(self, rider_id, latitude, longitude):
+        # 👇 import inside function (lazy import, avoids AppRegistryNotReady)
+        from user.models import User
+
         try:
             rider = User.objects.get(id=rider_id, is_rider=True)
             rider.latitude = float(latitude)

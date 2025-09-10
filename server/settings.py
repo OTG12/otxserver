@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from django.templatetags.static import static
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -54,6 +57,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -62,6 +66,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+
 
 ROOT_URLCONF = 'server.urls'
 
@@ -172,7 +179,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
+STATICFILES_DIRS = ["static"]
+STATIC_ROOT = "staticfiles"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -183,4 +193,46 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
+}
+
+
+STORAGES = {
+    # ...
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+UNFOLD = {
+    "SITE_TITLE": "OTX Admin",
+    "SITE_HEADER": "OTX Admin",
+    "SITE_LOGO": lambda request: static("logo.jpeg"),
+    "SITE_ICON": {
+        "light": lambda request: static("logo.jpeg"),
+        "dark": lambda request: static("logo.jpeg"),
+    },
+    "THEME": "light",
+    "COLORS": {
+        "primary": {
+            "50": "255 245 245",
+            "100": "255 230 230",
+            "200": "255 204 204",
+            "300": "255 178 178",
+            "400": "255 128 128",
+            "500": "255 77 77",
+            "600": "230 69 69",
+            "700": "204 60 60",
+            "800": "178 52 52",
+            "900": "153 43 43",
+            "950": "102 28 28",  # darkest red
+        },
+    },
+    "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "type": "image/png",
+            "href": lambda request: static("logo.jpeg"),
+        },
+    ],
 }

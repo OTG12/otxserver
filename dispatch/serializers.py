@@ -6,7 +6,7 @@ from .models import Dispatch
 class RiderSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "email", "latitude", "longitude"]
+        fields = ["id", "username", "phone_number", "email", "latitude", "longitude"]
 
 
 class ClientSerializer(serializers.ModelSerializer):
