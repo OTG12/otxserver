@@ -1,44 +1,55 @@
 from rest_framework import serializers
 from .models import KYC
 from user.models import User
-
-
-class UserBasicSerializer(serializers.ModelSerializer):
-    """Minimal user serializer to display basic info in KYC response"""
-
-    class Meta:
-        model = User
-        fields = ["id", "username", "email"]
-
+from file.models import File
 
 class KYCSerializer(serializers.ModelSerializer):
-    user = UserBasicSerializer(read_only=True)   # nested read-only view
-    user_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), write_only=True, source="user"
-    )
+    # Accept user ID and file IDs on create/update
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    document = serializers.PrimaryKeyRelatedField(queryset=File.objects.all(), many=True)
+    license_document = serializers.PrimaryKeyRelatedField(queryset=File.objects.all(), many=True)
+
+    # Custom read-only fields for GET
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+    phone_number = serializers.CharField(source='user.phone_number', read_only=True)
+    document_urls = serializers.SerializerMethodField()
+    license_document_urls = serializers.SerializerMethodField()
 
     class Meta:
         model = KYC
         fields = [
             "id",
             "user",
-            "user_id",
+            "user_email",
+            "username",
+            "phone_number",
+            "fullname",
             "doc_type",
             "document_id",
             "document",
+            "document_urls",
+            "licence_id",
+            "license_document",
+            "license_document_urls",
             "status",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "status", "created_at", "updated_at"]
 
-    def validate_document_id(self, value):
-        """Extra validation to prevent duplicate IDs"""
-        if KYC.objects.filter(document_id=value).exists():
-            raise serializers.ValidationError("This document ID is already registered.")
-        return value
+    def get_document_urls(self, obj):
+        return [file.url for file in obj.document.all()]
 
-    def create(self, validated_data):
-        """Ensure KYC starts with pending status always"""
-        validated_data["status"] = "pending"
-        return super().create(validated_data)
+    def get_license_document_urls(self, obj):
+        return [file.url for file in obj.license_document.all()]
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        
+        # Automatically update user.is_rider based on KYC status
+        if instance.status == "approved":
+            instance.user.is_rider = True
+        else:
+            instance.user.is_rider = False
+        instance.user.save()
+        return instance

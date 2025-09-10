@@ -23,11 +23,12 @@ class KYC(models.Model):
     )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="kyc_records")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="kyc_records")
+    fullname = models.CharField(max_length=225, unique=True)
     doc_type = models.CharField(max_length=50, choices=DOC_TYPES)
-    document_id = models.CharField(max_length=100)  # not globally unique
+    document_id = models.CharField(max_length=100)  
     document = models.ManyToManyField(File, related_name="kyc_documents")
-    licence_id = models.CharField(max_length=100)  # not globally unique
+    licence_id = models.CharField(max_length=100)  
     license_document = models.ManyToManyField(File, related_name="kyc_license_documents")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(default=timezone.now)

@@ -5,7 +5,6 @@ from utilities.sanitize import detect_type, scan_pdf_for_malware_bytes
 
 
 class FileSerializer(serializers.ModelSerializer):
-    # This field is only for write (upload), not read
     file = serializers.FileField(write_only=True, required=True)
 
     class Meta:
