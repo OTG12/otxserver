@@ -31,23 +31,26 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
+    "unfold",  # Better admin UI
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Project apps
     'user',
     'dispatch',
     'kyc',
+
+    # Third-party apps
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_yasg',
     'corsheaders',
-    
-
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import  Dispatch
-
+from .models import Dispatch
+from unfold.admin import ModelAdmin
 
 @admin.register(Dispatch)
-class DispatchAdmin(admin.ModelAdmin):
+class DispatchAdmin(ModelAdmin):
     list_display = (
         "tracking_id",
         "client",
