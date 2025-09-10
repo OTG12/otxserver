@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'user',
     'dispatch',
     'kyc',
+    'file',
+    'track',
 
     # Third-party apps
     'rest_framework',

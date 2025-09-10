@@ -23,53 +23,47 @@ class MediaService:
     @classmethod
     def upload(cls, file: Union[str, IO[bytes]], resource_type: str = "auto") -> str:
         """
-        Upload file to Cloudinary and return the secure_url.
-        - file: URL (str) or file-like object (IO[bytes])
-        - resource_type: "image", "video", "raw", or "auto"
+        Upload file to Cloudinary using http.client and return secure_url.
+        file: URL (str) or file-like object
         """
         timestamp = int(time.time())
         params = {"timestamp": timestamp}
         signature = sign(params, CLOUDSECRET)
 
         boundary = uuid.uuid4().hex
-        body_parts = []
+        CRLF = b"\r\n"
 
-        # Required fields
+        # Build multipart body
+        body = b""
         fields = {
             "timestamp": str(timestamp),
             "api_key": CLOUDKEY,
             "signature": signature,
         }
 
+        # Add normal fields
         for key, value in fields.items():
-            body_parts.append(f"--{boundary}\r\n")
-            body_parts.append(f'Content-Disposition: form-data; name="{key}"\r\n\r\n')
-            body_parts.append(f"{value}\r\n")
+            body += f"--{boundary}\r\n".encode()
+            body += f'Content-Disposition: form-data; name="{key}"\r\n\r\n'.encode()
+            body += f"{value}\r\n".encode()
 
-        # File field
+        # Add file field
         if isinstance(file, str):
-            body_parts.append(f"--{boundary}\r\n")
-            body_parts.append('Content-Disposition: form-data; name="file"\r\n\r\n')
-            body_parts.append(f"{file}\r\n")
+            filename = file.split("/")[-1]
+            mimetype = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+            with open(file, "rb") as f:
+                file_content = f.read()
         else:
             filename = getattr(file, "name", "upload.bin")
             mimetype = mimetypes.guess_type(filename)[0] or "application/octet-stream"
             file_content = file.read()
+            file.seek(0)
 
-            body_parts.append(f"--{boundary}\r\n")
-            body_parts.append(
-                f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'
-            )
-            body_parts.append(f"Content-Type: {mimetype}\r\n\r\n")
-            body_parts.append(file_content)
-            body_parts.append("\r\n")
-
-        body_parts.append(f"--{boundary}--\r\n")
-
-        body = b"".join(
-            part.encode("utf-8") if isinstance(part, str) else part
-            for part in body_parts
-        )
+        body += f"--{boundary}\r\n".encode()
+        body += f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode()
+        body += f"Content-Type: {mimetype}\r\n\r\n".encode()
+        body += file_content + CRLF
+        body += f"--{boundary}--\r\n".encode()
 
         headers = {
             "Content-Type": f"multipart/form-data; boundary={boundary}",

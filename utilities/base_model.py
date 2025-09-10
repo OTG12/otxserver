@@ -18,8 +18,8 @@ class BaseModel(models.Model):
 
 
 class MetaData(BaseModel):
-    latitude = models.FloatField()
-    longitude = models.FloatField()
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
     class Meta:
         abstract = True
