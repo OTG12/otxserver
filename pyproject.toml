@@ -10,9 +10,13 @@ dependencies = [
     "daphne>=4.2.1",
     "django>=5.2.5",
     "django-cors-headers>=4.7.0",
+    "django-unfold>=0.65.0",
     "djangorestframework>=3.16.1",
     "djangorestframework-simplejwt>=5.5.1",
     "drf-yasg>=1.21.10",
+    "fitz>=0.0.1.dev2",
+    "httpx>=0.28.1",
+    "orjson>=3.11.3",
     "pillow>=11.3.0",
     "python-dotenv>=1.1.1",
 ]
